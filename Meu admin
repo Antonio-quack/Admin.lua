@@ -1,0 +1,87 @@
+-- ADMIN KICK GUI COMPLETO by Manoamigo99
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+-- 1. CONFIGURAÇÃO
+local ADMINS = {
+	["Manoamigo99"] = true -- SEU NOME JÁ ESTÁ AQUI
+}
+local GUI_SIZE = UDim2.new(0, 250, 0, 400)
+local GUI_POS = UDim2.new(0, 15, 0.5, -200)
+
+-- 2. CRIA O REMOTEEVENT AUTOMATICO
+local KickEvent = ReplicatedStorage:FindFirstChild("AdminKickEvent")
+if not KickEvent then
+	KickEvent = Instance.new("RemoteEvent")
+	KickEvent.Name = "AdminKickEvent"
+	KickEvent.Parent = ReplicatedStorage
+end
+
+-- 3. SERVIDOR: EXECUTA O KICK DE VERDADE
+KickEvent.OnServerEvent:Connect(function(adminPlayer, targetName, reason)
+	if not ADMINS[adminPlayer.Name] then 
+		warn("[ADMIN] " .. adminPlayer.Name .. " tentou dar kick sem permissão")
+		return 
+	end
+	
+	local targetPlayer = Players:FindFirstChild(targetName)
+	if targetPlayer then
+		targetPlayer:Kick(reason or "Você foi expulso por um administrador.")
+		print("[ADMIN] " .. adminPlayer.Name .. " expulsou " .. targetName)
+	end
+end)
+
+-- 4. FUNÇÃO PARA CRIAR A GUI
+local function criarGUI(player)
+	local ScreenGui = Instance.new("ScreenGui")
+	ScreenGui.Name = "AdminKickGUI"
+	ScreenGui.ResetOnSpawn = false
+	ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+	ScreenGui.Parent = player:WaitForChild("PlayerGui")
+
+	local MainFrame = Instance.new("Frame")
+	MainFrame.Name = "Main"
+	MainFrame.Size = GUI_SIZE
+	MainFrame.Position = GUI_POS
+	MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+	MainFrame.BorderSizePixel = 0
+	MainFrame.Active = true
+	MainFrame.Draggable = true -- pode arrastar a GUI
+	MainFrame.Parent = ScreenGui
+	Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 8)
+
+	local TopBar = Instance.new("Frame")
+	TopBar.Size = UDim2.new(1, 0, 0, 35)
+	TopBar.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+	TopBar.BorderSizePixel = 0
+	TopBar.Parent = MainFrame
+	Instance.new("UICorner", TopBar).CornerRadius = UDim.new(0, 8)
+
+	local Title = Instance.new("TextLabel")
+	Title.Size = UDim2.new(0.7, 0, 1, 0)
+	Title.Position = UDim2.new(0, 10, 0, 0)
+	Title.Text = "Admin Panel"
+	Title.TextColor3 = Color3.new(1, 1, 1)
+	Title.BackgroundTransparency = 1
+	Title.Font = Enum.Font.GothamBold
+	Title.TextSize = 16
+	Title.TextXAlignment = Enum.TextXAlignment.Left
+	Title.Parent = TopBar
+
+	local CloseBtn = Instance.new("TextButton")
+	CloseBtn.Size = UDim2.new(0, 30, 0, 30)
+	CloseBtn.Position = UDim2.new(1, -35, 0, 2.5)
+	CloseBtn.Text = "X"
+	CloseBtn.TextColor3 = Color3.new(1, 1, 1)
+	CloseBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+	CloseBtn.Font = Enum.Font.GothamBold
+	CloseBtn.TextSize = 16
+	CloseBtn.Parent = TopBar
+	Instance.new("UICorner", CloseBtn).CornerRadius = UDim.new(0, 4)
+	CloseBtn.MouseButton1Click:Connect(function() ScreenGui:Destroy() end)
+
+	local PlayerList = Instance.new("ScrollingFrame")
+	PlayerList.Name = "PlayerList"
+	PlayerList.Size = UDim2.new(1, -10, 1, -45)
+	PlayerList.Position = UDim2.new(0, 5, 0, 40)
+	PlayerList.BackgroundTransparency =
